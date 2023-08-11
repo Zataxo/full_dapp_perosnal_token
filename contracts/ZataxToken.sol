@@ -1,131 +1,88 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
-
+// Token Design
+// 1 - Intial Supply -> 5M intial supply done
+// 2 - Max Supply -> Set it to 10M
+// 3 - Minting Strategy
+// 4 - Block reward -> set in the constructor
+// 5 - Burnable
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Capped.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 import "hardhat/console.sol";
 
-interface IERC20 {
-    function totalSupply() external view returns (uint);
-
-    function balanceOf(address account) external view returns (uint);
-
-    function transfer(address recipient, uint amount) external returns (bool);
-
-    function allowance(address owner, address spender) external view returns (uint);
-
-    function approve(address spender, uint amount) external returns (bool);
-
-    function transferFrom(
-        address sender,
-        address recipient,
-        uint amount
-    ) external returns (bool);
-
-    event Transfer(address indexed from, address indexed to, uint value);
-    event Approval(address indexed owner, address indexed spender, uint value);
-}
-contract PersonalToken is IERC20 {
-    uint public totalSupply;
-    uint public maxSupply;
-    mapping(address=>uint) public balanceOf;
-    mapping (address=>mapping (address=>uint)) public allowance;
-    string public name = "ZataxToken";
-    string public symbol = "ZTX";
-    uint public deceimals = 18;
+contract ZataxToken is ERC20Capped, ERC20Burnable {
+    address payable public owner;
+    uint public blockReward;
     struct Transactions{
         address from;
         address to;
         uint amount;
-        string tType;
     }
     Transactions[] public transactions;
-
-    address private owner;
-    constructor(uint _cap) {
-        owner = msg.sender;
-        maxSupply = _cap * (10 ** deceimals);
-        mint(5);
-    }
-    function getOwner() public view returns(address){
-        return owner;
-    }
-    function getTotalSupply() public view returns(uint){
-        return totalSupply;
-    }
-    function getMaxSupply() public view returns(uint){
-        return maxSupply;
-    }
-    function getInvalidAddress() public pure returns(address){
-        return address(0);
-    }
     
 
-    function transfer(address recipient, uint amount) external returns (bool){
-        require(recipient != address(0),"Invaild Address");
-        uint amt = amount * (10 ** deceimals);
-        balanceOf[msg.sender] -= amt;
-        balanceOf[recipient] += amt;
+    constructor(
+        uint _maxSupply,
+        uint _reward
+    ) ERC20("ZataxToken", "ZTX") ERC20Capped(_maxSupply * (10 ** decimals())) {
+        owner = payable(msg.sender);
+        _mint(msg.sender, 5000000 * (10 ** decimals()));
+        blockReward = _reward * (10 ** decimals());
+    }
+
+    // overriding mint function cuz its defined in two inheirted contracts
+    function _mint(
+        address account,
+        uint256 amount
+    ) internal override(ERC20Capped, ERC20) {
+        require(
+            ERC20.totalSupply() + amount <= cap(),
+            "ERC20Capped: cap exceeded"
+        );
+        super._mint(account, amount);
+    }
+
+    // function for minting the miner the block reward he inculded in the blockchain
+    function _mintMinerReward() internal {
+        _mint(block.coinbase, blockReward);
+    }
+
+    // function to check before transfering miner reward
+    function _beforeTokenTransfer(
+        address _from,
+        address _to,
+        uint _value
+    ) internal virtual override {
+        if (
+            _from == address(0) &&
+            _to != block.coinbase &&
+            block.coinbase != address(0)
+        ) {
+            _mintMinerReward();
+        }
         transactions.push(Transactions({
-            from:msg.sender,
-            to:recipient,
-            amount:amount,
-            tType:"Direct"
-
+            from:_from,
+            to:_to,
+            amount:_value
         }));
-        emit Transfer(msg.sender, recipient, amount);
-        return true;
+        super._beforeTokenTransfer(_from, _to, _value);
+        
     }
 
-    
-    function approve(address spender, uint amount) external returns (bool){
-        require(spender != address(0),"Invaild Address");
-        uint amt = amount * (10 ** deceimals);
-        allowance[msg.sender][spender] = amt;
-        emit Approval(msg.sender, spender, amt);
-        return true;
+    // function for setting up the block reward
+    function setBlockReward(uint _reward) public onlyOwner {
+        blockReward = _reward * (10 ** decimals());
     }
 
-    function transferFrom(
-        address sender,
-        address recipient,
-        uint amount
-    ) external returns (bool)
-    {
-        require(sender != address(0) && recipient != address(0),"Invaild Address");
-        uint amt = amount * (10 ** deceimals);
-        allowance[sender][msg.sender] -=amt;
-        balanceOf[sender] -= amt;
-        balanceOf[recipient] += amt;
-          transactions.push(Transactions({
-            from:sender,
-            to:recipient,
-            amount:amount,
-            tType:"Indirect"
+    // function to destroy the token (in case u need it)
+    function destroy() public onlyOwner {
+        selfdestruct(owner); // selfdestruct is deprecated but you can still use it , but not for a long
+    }
 
-        }));
-        emit Transfer(sender, recipient, amt);
-        return true;
-    }
- 
-    function mint(uint amount) public onlyOwner {
-        uint amt = amount * (10 ** deceimals);
-        require((totalSupply + amt) <= maxSupply,"Can not exceeds the max supply");
-        balanceOf[owner] += amt;
-        totalSupply += amt;
-        emit Transfer(address(0), owner, amt);
-    }
-    function burn(uint amount) external onlyOwner {
-        uint amt = amount * (10 ** deceimals);
-        balanceOf[owner] -= amt;
-        totalSupply -= amt;
-        emit Transfer(owner,address(0), amt);
-    }
-    modifier onlyOwner(){
-        require(msg.sender == owner,"Only Owner Can Call");
+    // modifer to restrict function excution to be only the owner
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Only owner can call");
         _;
     }
-
-
-
 }
-
-

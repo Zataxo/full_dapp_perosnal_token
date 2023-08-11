@@ -1,66 +1,49 @@
 const {expect} = require("chai");
+// const { ethers } = require("hardhat");
 const hre = require("hardhat");
-describe("Owner restriction",function(){
-    let myToken;
+describe("ZataxToken Contract", function(){
+    // let Token;
+    let zataxToken;
     let owner;
-    let addressOne;
-    let addressTwo;
-    let maxSupply = 100;
-    beforeEach(async function(){
-        myToken = await hre.ethers.deployContract("PersonalToken",[maxSupply]);
-        [owner,addressOne,addressTwo] = await hre.ethers.getSigners();
+    let add1;
+    let add2;
+    let maxCap = 100000000;
+    let blockReward = 50;
+    beforeEach(async function() {
+        zataxToken = await ethers.deployContract("ZataxToken",[maxCap,blockReward]);
+        [owner,add1,add2] = await ethers.getSigners();
     });
     it("Should Set The Right Owner",async function(){
-        const ownerAddress =await myToken.getOwner();
+        const ownerAddress = await zataxToken.owner();
+        // console.log(await zataxToken.owner());
         expect(ownerAddress).to.equal(owner.address);
     });
-    it("Only Owner Should Mint Tokens",async function(){
-        await expect(myToken.connect(addressOne).mint(5)).to.be.revertedWith('Only Owner Can Call');         
-        const ownerBalanceBefore = await myToken.balanceOf(owner.address);
-        await myToken.mint(5);
-        const ownerBalanceAfter = await myToken.balanceOf(owner.address);
-        expect(Number(hre.ethers.formatEther(ownerBalanceAfter))-Number(hre.ethers.formatEther(ownerBalanceBefore))).to.equal(5);
-
+    it("Total supply is assigned to the owner balance",async function(){
+        const tokenSupply = await zataxToken.totalSupply();
+        const ownerBalance = await zataxToken.balanceOf(owner.address);
+        expect(tokenSupply).to.equal(ownerBalance);
     });
-    it("Owner Should not Mint More Than The Max Supply",async function(){
-        await expect(myToken.mint(96)).to.be.revertedWith('Can not exceeds the max supply');
-    });
-    it("Only Owner Should Burn Tokens",async function(){
-        await expect(myToken.connect(addressOne).burn(5)).to.be.revertedWith("Only Owner Can Call");
+    it("Address one balance should be zero",async function(){
+        const addressOneBalance = await zataxToken.balanceOf(add1);
+        expect(addressOneBalance).to.equal(0);
     })
-})
-describe("Transactions restriction",function(){
-    let myToken;
-    let owner;
-    let addressOne;
-    let addressTwo;
-    let maxSupply = 100;
-    beforeEach(async function(){
-        myToken = await hre.ethers.deployContract("PersonalToken",[maxSupply]);
-        [owner,addressOne,addressTwo] = await hre.ethers.getSigners();
-    });
-    it("Should not Transfer For Zero Address",async function(){
-        const invalidAddress = await myToken.getInvalidAddress();
-       await expect(myToken.transfer(invalidAddress,5)).to.be.revertedWith('Invaild Address');
-    });
-    it("Approve Tokens on Behalf Owner Should set Owner's Allowance",async function(){
-       await myToken.approve(addressOne.address,3);
-       const ownerAllowance = await myToken.allowance(owner.address,addressOne.address);
-       expect(Number(hre.ethers.formatEther(ownerAllowance))).to.equal(3);
-    });
-    it("Sending Tokens on Behalf Owner Should deduct it From The Allowance",async function(){
-       await myToken.approve(addressOne.address,3);
-    //    const ownerAllowance = await myToken.allowance(owner.address,addressOne.address);
-       await myToken.connect(addressOne).transferFrom(owner.address,addressTwo.address,3);
-       const addressTwoAmount = await myToken.balanceOf(addressTwo.address);
-       expect(Number(hre.ethers.formatEther(addressTwoAmount))).to.equal(3);
- 
-    });
-    it("Should Transfer Between Accounts",async function(){
-        await myToken.transfer(addressOne.address,2);
-        const ownerAfterAmount = await myToken.balanceOf(owner.address);
-        const addressOneBalance = await myToken.balanceOf(addressOne.address);
-        expect(Number(hre.ethers.formatEther(addressOneBalance))).to.equal(2)
-        expect(Number(hre.ethers.formatEther(ownerAfterAmount))).to.equal(3)
+    it("Should transfer tokens between account",async function(){
+        // transfer from the owner to address1
+        await zataxToken.transfer(add1,50);
+        const addressOneBalance = await zataxToken.balanceOf(add1.address)
+        expect(addressOneBalance).to.equal(50);
+        // transfering from address1 to address 2
+        await zataxToken.connect(add1).transfer(add2.address,20);
+        const add2Balance = await zataxToken.balanceOf(add2.address);
+        expect(add2Balance).to.equal(20);
+    })
+    it("Should not allow to transfer from empty account",async function(){
+        const ownerBalance = await zataxToken.balanceOf(owner.address);
+        await expect(zataxToken.connect(add1).transfer(owner.address,1)).to.be.reverted;
+        expect(ownerBalance).to.equal(await zataxToken.balanceOf(owner.address));
+    })
+    it("Should set the max cap supply to the token",async function(){
+        const tokenMaxSupply = await zataxToken.cap();
+        expect(maxCap).to.equal(Number(hre.ethers.formatEther(tokenMaxSupply)));
     })
 })
