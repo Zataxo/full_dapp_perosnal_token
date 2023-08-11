@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:personal_token_tracker/utils/contract_linking.dart';
 import 'package:personal_token_tracker/utils/util_logic.dart';
 import 'package:personal_token_tracker/view/home_screen.dart';
+import 'package:personal_token_tracker/view_model/profile_view_model.dart';
 import 'package:provider/provider.dart';
 
-void main() {
+Future<void> main() async {
+  await dotenv.load(fileName: ".env");
+
   runApp(const MyApp());
 }
 
@@ -17,7 +22,13 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(
           create: (context) => UtilLogic(),
-        )
+        ),
+        ChangeNotifierProvider(
+          create: (context) => ContractLinking(),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => ProfileViewModel(),
+        ),
       ],
       child: const MaterialApp(
         title: 'Flutter Demo',

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:personal_token_tracker/utils/enums.dart';
 import 'package:personal_token_tracker/utils/util_logic.dart';
 import 'package:personal_token_tracker/view/home_tap_controller_screen.dart';
+import 'package:personal_token_tracker/view_model/profile_view_model.dart';
 import 'package:personal_token_tracker/widget/custom_button.dart';
 import 'package:provider/provider.dart';
 
@@ -15,6 +16,9 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
+    final x = Provider.of<ProfileViewModel>(context);
+    // final x = Provider.of<ContractLinking>(context);
+    // print(ContractLinking.networkUrl);
     final size = MediaQuery.of(context).size;
     return SafeArea(
         child: Scaffold(
@@ -69,7 +73,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       color: Color(0xffFFFFFF), fontWeight: FontWeight.bold),
                   icon: const Icon(Icons.arrow_forward_ios_outlined),
                   onPressed: () {
-                    // print("d");
                     utilLogic.setLoadingState(LoadingState.loading);
                     Future.delayed(const Duration(seconds: 2), () {
                       utilLogic.setLoadingState(LoadingState.intial);
@@ -79,6 +82,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             builder: (context) => const HomeTapController(),
                           ));
                     });
+                    x.fetchProfile();
                   },
                 ),
               ),

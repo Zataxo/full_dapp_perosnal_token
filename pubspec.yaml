@@ -36,6 +36,10 @@ dependencies:
   flutter_svg: ^1.0.3
   provider: ^6.0.5
   animated_bottom_navigation_bar: ^1.2.0
+  flutter_dotenv: ^5.1.0
+  web3dart: ^2.3.5
+  web_socket_channel: ^2.4.0
+  http: ^0.13.5
 
 dev_dependencies:
   flutter_test:
@@ -62,7 +66,8 @@ flutter:
   assets:
     - assets/imgs/
     - assets/icons/
-  #   - images/a_dot_ham.jpeg
+    - artifacts/contracts/ZataxToken.sol/
+    - .env
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

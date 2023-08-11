@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:personal_token_tracker/dialog/mint_dialog.dart';
 import 'package:personal_token_tracker/view/home_screen.dart';
+import 'package:personal_token_tracker/view_model/profile_view_model.dart';
+import 'package:provider/provider.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -79,15 +81,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       "0.5 % Today",
                       style: TextStyle(color: Color(0xffD975BB)),
                     )),
-                const Positioned(
+                Positioned(
                     top: 85,
                     left: 45,
-                    child: Text(
-                      "10,000,000 ZTX",
-                      style: TextStyle(
-                          color: Color(0xffFFFFFF),
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18),
+                    child: Selector<ProfileViewModel, String?>(
+                      selector: (context, valueToLsit) =>
+                          valueToLsit.ownerBalance,
+                      builder: (context, value, child) => Text(
+                        value ?? "-",
+                        style: const TextStyle(
+                            color: Color(0xffFFFFFF),
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18),
+                      ),
                     )),
               ],
             ),
