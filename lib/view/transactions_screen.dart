@@ -33,7 +33,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                 child: Consumer<TransactionsViewModel>(
                     builder: (context, value, child) {
                   if (value.state == LoadingState.loading) {
-                    return const CircularProgressIndicator();
+                    return const Center(child: CircularProgressIndicator());
                   } else {
                     return ListView.separated(
                         separatorBuilder: (context, index) => const Divider(),
