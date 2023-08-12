@@ -19,12 +19,12 @@ class ContractLinking extends ChangeNotifier {
   late Credentials credentials;
   late DeployedContract contract;
 
-  late ContractFunction ownerBalance;
-  late ContractFunction totalSupply;
-  late ContractFunction transactions;
   late EthereumAddress ownerEthAddress;
   late String ownerAddress;
 
+  late ContractFunction ownerBalance;
+  late ContractFunction totalSupply;
+  late ContractFunction transactions;
   intialize() async {
     client = Web3Client(
       _networkUrl,
@@ -49,6 +49,7 @@ class ContractLinking extends ChangeNotifier {
     // Listing my token functions
     totalSupply = contract.function("totalSupply");
     ownerBalance = contract.function("balanceOf");
+    transactions = contract.function("transactions");
     notifyListeners();
   }
 }

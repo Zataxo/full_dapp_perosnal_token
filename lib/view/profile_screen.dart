@@ -1,5 +1,8 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:personal_token_tracker/dialog/mint_dialog.dart';
+import 'package:personal_token_tracker/utils/util_funcs.dart';
 import 'package:personal_token_tracker/view/home_screen.dart';
 import 'package:personal_token_tracker/view_model/profile_view_model.dart';
 import 'package:provider/provider.dart';
@@ -12,6 +15,25 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  // final channel = IOWebSocketChannel.connect(
+  //     "-");
+  // @override
+  // void initState() {
+  //   // print("object");
+  //   streamListener();
+  //   super.initState();
+  // }
+
+  // streamListener() {
+  //   print("Heelo");
+
+  //   channel.stream.listen((event) {
+  //     print("---------");
+  //     print(event);
+  //     print("---------");
+  //   });
+  // }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -83,18 +105,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     )),
                 Positioned(
                     top: 85,
-                    left: 45,
-                    child: Selector<ProfileViewModel, String?>(
-                      selector: (context, valueToLsit) =>
-                          valueToLsit.ownerBalance,
-                      builder: (context, value, child) => Text(
-                        value ?? "-",
-                        style: const TextStyle(
-                            color: Color(0xffFFFFFF),
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18),
-                      ),
-                    )),
+                    left: 35,
+                    child: Selector<ProfileViewModel, BigInt?>(
+                        selector: (context, valueToLsit) =>
+                            valueToLsit.ownerBalance,
+                        builder: (context, value, child) {
+                          final temp = value ??
+                              BigInt.from(0) / BigInt.from(pow(10, 18));
+                          return Text(
+                            formatCurrency(currency: temp.toString()),
+                            style: const TextStyle(
+                                color: Color(0xffFFFFFF),
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14),
+                          );
+                        })),
               ],
             ),
           ),

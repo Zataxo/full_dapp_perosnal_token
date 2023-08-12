@@ -2,6 +2,8 @@ import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.da
 import 'package:flutter/material.dart';
 import 'package:personal_token_tracker/view/profile_screen.dart';
 import 'package:personal_token_tracker/view/transactions_screen.dart';
+import 'package:personal_token_tracker/view_model/transactions_view_model.dart';
+import 'package:provider/provider.dart';
 
 class HomeTapController extends StatefulWidget {
   const HomeTapController({Key? key}) : super(key: key);
@@ -16,6 +18,7 @@ class _HomeTapControllerState extends State<HomeTapController> {
     const TransactionScreen()
   ];
   int _bottomNavIndex = 0;
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -44,22 +47,30 @@ class _HomeTapControllerState extends State<HomeTapController> {
             ),
             floatingActionButtonLocation:
                 FloatingActionButtonLocation.centerDocked,
-            bottomNavigationBar: AnimatedBottomNavigationBar(
-              icons: const [Icons.credit_card_outlined, Icons.list],
-              activeIndex: _bottomNavIndex,
-              gapLocation: GapLocation.center,
-              notchSmoothness: NotchSmoothness.verySmoothEdge,
-              leftCornerRadius: 32,
-              rightCornerRadius: 32,
-              activeColor: const Color(0xffD975BB),
-              inactiveColor: const Color(0xffFFFFFF),
-              onTap: (index) {
-                print(index);
-                setState(() => _bottomNavIndex = index);
-              },
-              backgroundColor: const Color(0xff261863),
+            bottomNavigationBar: Consumer<TransactionsViewModel>(
+              builder: (context, transactionsViewModel, child) =>
+                  AnimatedBottomNavigationBar(
+                icons: const [Icons.credit_card_outlined, Icons.list],
+                activeIndex: _bottomNavIndex,
+                gapLocation: GapLocation.center,
+                notchSmoothness: NotchSmoothness.verySmoothEdge,
+                leftCornerRadius: 32,
+                rightCornerRadius: 32,
+                activeColor: const Color(0xffD975BB),
+                inactiveColor: const Color(0xffFFFFFF),
+                onTap: (index) {
+                  print(index);
+                  if (index == 1) {
+                    transactionsViewModel.fetchTransactions();
+                  }
+                  _bottomNavIndex = index;
 
-              //other params
+                  setState(() {});
+                },
+                backgroundColor: const Color(0xff261863),
+
+                //other params
+              ),
             ),
             backgroundColor: const Color(0xffFFFFFF),
             body: screenList[_bottomNavIndex]));

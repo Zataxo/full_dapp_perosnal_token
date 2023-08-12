@@ -6,6 +6,8 @@ import 'package:personal_token_tracker/view/home_screen.dart';
 import 'package:personal_token_tracker/view_model/profile_view_model.dart';
 import 'package:provider/provider.dart';
 
+import 'view_model/transactions_view_model.dart';
+
 Future<void> main() async {
   await dotenv.load(fileName: ".env");
 
@@ -28,6 +30,9 @@ class MyApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(
           create: (context) => ProfileViewModel(),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => TransactionsViewModel(),
         ),
       ],
       child: const MaterialApp(

@@ -6,7 +6,7 @@ import 'package:personal_token_tracker/utils/enums.dart';
 
 class ProfileViewModel extends ChangeNotifier {
   ContractLinking link = ContractLinking();
-  String? ownerBalance;
+  BigInt? ownerBalance;
   LoadingState state = LoadingState.intial;
   void setLoadingState(LoadingState _state) {
     state = _state;
@@ -23,8 +23,8 @@ class ProfileViewModel extends ChangeNotifier {
         params: [link.ownerEthAddress],
       );
 
-      print(response[0]);
-      ownerBalance = response[0].toString();
+      // print(response[0]);
+      ownerBalance = response[0];
     } catch (e) {
       log(e.toString());
     }
