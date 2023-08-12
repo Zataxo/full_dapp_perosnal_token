@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:personal_token_tracker/utils/enums.dart';
+import 'package:personal_token_tracker/view_model/profile_view_model.dart';
+import 'package:personal_token_tracker/view_model/transactions_view_model.dart';
 import 'package:personal_token_tracker/widget/custome_text_form_field.dart';
+import 'package:provider/provider.dart';
 
 class MintDialog extends StatefulWidget {
   const MintDialog({Key? key}) : super(key: key);
@@ -9,6 +13,7 @@ class MintDialog extends StatefulWidget {
 }
 
 class _MintDialogState extends State<MintDialog> {
+  late final _prov = Provider.of<TransactionsViewModel>(context);
   final _amount = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   @override
@@ -22,7 +27,9 @@ class _MintDialogState extends State<MintDialog> {
         decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(15),
             color: const Color(0xffF9F9F9)),
-        child: _buildMintForm(context),
+        child: _prov.state == LoadingState.loading
+            ? const CircularProgressIndicator()
+            : _buildMintForm(context),
       ),
     );
   }
@@ -37,7 +44,7 @@ class _MintDialogState extends State<MintDialog> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text(
-                "Mint me",
+                "Transfer Fund",
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
               IconButton(
@@ -66,16 +73,18 @@ class _MintDialogState extends State<MintDialog> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                TextButton(
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        //
-                      }
-                    },
-                    child: const Text(
-                      "Mint",
-                      style: TextStyle(color: Color(0XFF171532)),
-                    )),
+                Consumer<ProfileViewModel>(
+                  builder: (context, value, child) => TextButton(
+                      onPressed: () async {
+                        if (_formKey.currentState!.validate()) {
+                          await value.transfer();
+                        }
+                      },
+                      child: const Text(
+                        "Transfer",
+                        style: TextStyle(color: Color(0XFF171532)),
+                      )),
+                ),
               ],
             ),
           )

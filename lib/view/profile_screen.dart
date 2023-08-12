@@ -1,7 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:personal_token_tracker/dialog/mint_dialog.dart';
+import 'package:personal_token_tracker/dialog/send_dialog.dart';
 import 'package:personal_token_tracker/utils/util_funcs.dart';
 import 'package:personal_token_tracker/view/home_screen.dart';
 import 'package:personal_token_tracker/view_model/profile_view_model.dart';
@@ -146,7 +146,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     child: InkWell(
                       highlightColor: Colors.transparent,
                       splashColor: Colors.transparent,
-                      onTap: () => print("send"),
+                      onTap: () => showDialog(
+                          context: context,
+                          builder: (context) => const MintDialog()),
                       child: Image.asset(
                         "assets/imgs/mint.png",
                       ),
@@ -168,9 +170,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     child: InkWell(
                       highlightColor: Colors.transparent,
                       splashColor: Colors.transparent,
-                      onTap: () => showDialog(
-                          context: context,
-                          builder: (context) => const MintDialog()),
+                      onTap: () => print("object"),
                       child: Image.asset(
                         "assets/imgs/send.png",
                       ),

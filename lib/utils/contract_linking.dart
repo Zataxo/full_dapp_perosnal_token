@@ -23,7 +23,7 @@ class ContractLinking extends ChangeNotifier {
   late String ownerAddress;
 
   late ContractFunction ownerBalance;
-  late ContractFunction totalSupply;
+  late ContractFunction transfer;
   late ContractFunction transactions;
   intialize() async {
     client = Web3Client(
@@ -47,7 +47,7 @@ class ContractLinking extends ChangeNotifier {
     ownerAddress = ownerEthAddress.toString();
 
     // Listing my token functions
-    totalSupply = contract.function("totalSupply");
+    transfer = contract.function("transfer");
     ownerBalance = contract.function("balanceOf");
     transactions = contract.function("transactions");
     notifyListeners();
